@@ -1,0 +1,36 @@
+name: Build and upload slides
+
+on:
+  # # every midnight
+  # schedule:
+  #   - cron:  '0 0 * * *'
+  # manual trigger
+  workflow_dispatch:
+  # push
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies for latex
+        run: |
+          sudo apt update
+          sudo apt install -y texlive texlive-latex-extra texlive-luatex texlive-bibtex-extra texlive-science biber latexmk
+
+      - name: Create LaTeX beamer
+        run: |
+          latexmk -shell-escape slides.tex
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v3
+        with:
+          name: Slides
+          path: |
+            **/*.pdf
+          if-no-files-found: error
